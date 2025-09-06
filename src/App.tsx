@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import HostDashboard from "./pages/HostDashboard";
+import PlayerDashboard from "./pages/PlayerDashboard";
 import CreateGame from "./pages/CreateGame";
 import JoinGame from "./pages/JoinGame";
 import GameManage from "./pages/GameManage";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/host" element={<HostDashboard />} />
+            <Route path="/player" element={<PlayerDashboard />} />
             <Route path="/create-game" element={<CreateGame />} />
             <Route path="/join/:inviteCode" element={<JoinGame />} />
             <Route path="/game/:gameId/manage" element={<GameManage />} />

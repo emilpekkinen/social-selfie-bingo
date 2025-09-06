@@ -29,8 +29,8 @@ const Index = () => {
               <Link to="/host">
                 <Button size="lg">Host a Game</Button>
               </Link>
-              <Link to="/host">
-                <Button variant="outline" size="lg">See Dashboard</Button>
+              <Link to="/player">
+                <Button variant="outline" size="lg">My Games</Button>
               </Link>
               <JoinLobbyButton />
             </div>

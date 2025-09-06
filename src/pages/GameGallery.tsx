@@ -46,7 +46,7 @@ const GameGallery = () => {
 
   const fetchGameGallery = async () => {
     try {
-      // Check if user is host of this game
+      // Check if user is host or participant of this game
       const { data: gameData, error: gameError } = await supabase
         .from('games')
         .select('id, title, status, host_id')
@@ -55,11 +55,27 @@ const GameGallery = () => {
 
       if (gameError) throw gameError;
 
-      if (gameData.host_id !== user?.id) {
+      // Check if user is host
+      const isHost = gameData.host_id === user?.id;
+      
+      // Check if user is a participant
+      let isParticipant = false;
+      if (!isHost) {
+        const { data: playerData } = await supabase
+          .from('players')
+          .select('id')
+          .eq('game_id', gameId)
+          .eq('user_id', user?.id)
+          .single();
+        
+        isParticipant = !!playerData;
+      }
+
+      if (!isHost && !isParticipant) {
         toast({
           variant: 'destructive',
           title: 'Access Denied',
-          description: 'Only the host can view the game gallery.',
+          description: 'Only the host and participants can view the game gallery.',
         });
         navigate('/');
         return;
