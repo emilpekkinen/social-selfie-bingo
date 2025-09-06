@@ -37,6 +37,7 @@ const GameGallery = () => {
   const [game, setGame] = useState<GameData | null>(null);
   const [photos, setPhotos] = useState<GamePhoto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
     if (gameId && user) {
@@ -82,6 +83,7 @@ const GameGallery = () => {
       }
 
       setGame(gameData);
+      setIsHost(isHost);
 
       // Get all photos from this game
       const { data: photosData, error: photosError } = await supabase
@@ -152,10 +154,10 @@ const GameGallery = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to={`/game/${gameId}/manage`}>
+            <Link to={isHost ? `/game/${gameId}/manage` : '/player-dashboard'}>
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Game
+                {isHost ? 'Back to Game' : 'Back to My Games'}
               </Button>
             </Link>
             <div>
