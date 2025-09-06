@@ -94,22 +94,23 @@ const HostDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="w-full max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Host Dashboard</h1>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">Host Dashboard</h1>
             <p className="text-muted-foreground">Manage your Social Bingo games</p>
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/create-game">
-              <Button size="lg" className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+            <Link to="/create-game" className="w-full sm:w-auto">
+              <Button size="lg" className="flex items-center justify-center gap-2 w-full">
                 <Plus className="h-5 w-5" />
-                Create New Game
+                <span className="hidden sm:inline">Create New Game</span>
+                <span className="sm:hidden">Create Game</span>
               </Button>
             </Link>
-            <Button variant="outline" onClick={signOut}>
+            <Button variant="outline" onClick={signOut} className="w-full sm:w-auto">
               Sign Out
             </Button>
           </div>
@@ -172,39 +173,43 @@ const HostDashboard = () => {
             <div className="grid gap-4">
               {games.map((game) => (
                 <Card key={game.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold">{game.title}</h3>
-                          <Badge 
-                            className={`${getStatusColor(game.status)} text-white`}
-                          >
-                            {game.status}
-                          </Badge>
-                          <Badge variant="outline">
-                            {game.card_size === 9 ? '3×3' : '5×5'}
-                          </Badge>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                          <h3 className="text-lg font-semibold truncate">{game.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              className={`${getStatusColor(game.status)} text-white`}
+                            >
+                              {game.status}
+                            </Badge>
+                            <Badge variant="outline">
+                              {game.card_size === 9 ? '3×3' : '5×5'}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Users className="h-4 w-4" />
                             {game.player_count} players
                           </span>
-                          <span>Code: {game.invite_code}</span>
-                          <span>Created {new Date(game.created_at).toLocaleDateString()}</span>
+                          <span className="truncate">Code: {game.invite_code}</span>
+                          <span className="hidden sm:inline">Created {new Date(game.created_at).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto mt-3 sm:mt-0">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => copyInviteLink(game.invite_code)}
+                          className="w-full sm:w-auto"
                         >
-                          Copy Invite Link
+                          <span className="hidden sm:inline">Copy Invite Link</span>
+                          <span className="sm:hidden">Copy Link</span>
                         </Button>
-                        <Link to={`/game/${game.id}/manage`}>
-                          <Button size="sm" className="flex items-center gap-1">
+                        <Link to={`/game/${game.id}/manage`} className="w-full sm:w-auto">
+                          <Button size="sm" className="flex items-center justify-center gap-1 w-full">
                             <ExternalLink className="h-4 w-4" />
                             Manage
                           </Button>

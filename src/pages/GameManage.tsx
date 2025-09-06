@@ -208,49 +208,56 @@ const GameManage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="w-full max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0 flex-1">
             <Link to="/host">
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
+                <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="sm:hidden">Back</span>
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold">{game.title}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge className={`${getStatusColor(game.status)} text-white`}>
-                  {game.status}
-                </Badge>
-                <Badge variant="outline">
-                  {game.card_size === 9 ? '3×3' : '5×5'}
-                </Badge>
-                <span className="text-muted-foreground">Code: {game.invite_code}</span>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-3xl font-bold truncate">{game.title}</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-1">
+                <div className="flex items-center gap-2">
+                  <Badge className={`${getStatusColor(game.status)} text-white`}>
+                    {game.status}
+                  </Badge>
+                  <Badge variant="outline">
+                    {game.card_size === 9 ? '3×3' : '5×5'}
+                  </Badge>
+                </div>
+                <span className="text-muted-foreground text-sm truncate">Code: {game.invite_code}</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Link to={`/game/${gameId}/gallery`}>
-              <Button variant="outline">
-                <Images className="h-4 w-4 mr-2" />
-                View Gallery
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <div className="flex gap-2">
+              <Link to={`/game/${gameId}/gallery`} className="flex-1 sm:flex-initial">
+                <Button variant="outline" className="w-full">
+                  <Images className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">View Gallery</span>
+                  <span className="sm:hidden">Gallery</span>
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={copyInviteLink} className="flex-1 sm:flex-initial">
+                <Copy className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Copy Invite Link</span>
+                <span className="sm:hidden">Copy</span>
               </Button>
-            </Link>
-            <Button variant="outline" onClick={copyInviteLink}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copy Invite Link
-            </Button>
+            </div>
             {game.status === 'lobby' && (
-              <Button onClick={startGame} disabled={game.players.length === 0}>
+              <Button onClick={startGame} disabled={game.players.length === 0} className="w-full sm:w-auto">
                 <Play className="h-4 w-4 mr-2" />
                 Start Game
               </Button>
             )}
             {game.status === 'active' && (
-              <Button variant="destructive" onClick={endGame}>
+              <Button variant="destructive" onClick={endGame} className="w-full sm:w-auto">
                 End Game
               </Button>
             )}
@@ -312,13 +319,13 @@ const GameManage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className={`grid ${gridCols} gap-2`}>
+                <div className={`grid ${gridCols} gap-1 sm:gap-2`}>
                   {game.bingo_items
                     .sort((a, b) => a.position - b.position)
                     .map((item) => (
                       <div
                         key={item.id}
-                        className="border rounded p-3 min-h-[80px] flex items-center justify-center text-center text-sm bg-muted"
+                        className="border rounded p-2 sm:p-3 min-h-[60px] sm:min-h-[80px] flex items-center justify-center text-center text-xs sm:text-sm bg-muted"
                       >
                         {item.text_prompt}
                       </div>

@@ -266,25 +266,26 @@ const PlayGame = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="w-full max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0 flex-1">
             <Link to="/">
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Home
+                <span className="hidden sm:inline">Home</span>
+                <span className="sm:hidden">Back</span>
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold">{game.title}</h1>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-3xl font-bold truncate">{game.title}</h1>
               <Badge className={`${game.status === 'active' ? 'bg-green-500' : 'bg-gray-500'} text-white mt-2`}>
                 {game.status}
               </Badge>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Users className="h-4 w-4" />
             {game.players.length} players
           </div>
@@ -328,7 +329,7 @@ const PlayGame = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className={`grid ${gridCols} gap-3`}>
+            <div className={`grid ${gridCols} gap-2 sm:gap-3`}>
               {game.bingo_items
                 .sort((a, b) => a.position - b.position)
                 .map((item) => {
@@ -337,7 +338,7 @@ const PlayGame = () => {
                     <div
                       key={item.id}
                       className={`
-                        border rounded-lg p-4 min-h-[120px] flex flex-col items-center justify-center text-center text-sm
+                        border rounded-lg p-2 sm:p-4 min-h-[100px] sm:min-h-[120px] flex flex-col items-center justify-center text-center text-xs sm:text-sm
                         ${isCompleted 
                           ? 'bg-green-50 border-green-200 text-green-800' 
                           : 'bg-background border-border hover:bg-accent'
@@ -396,8 +397,8 @@ const PlayGame = () => {
             <div className="space-y-2">
               {game.players.map((player) => (
                 <div key={player.id} className="flex items-center justify-between p-2 border rounded">
-                  <span className="font-medium">{player.name}</span>
-                  <div className="flex items-center gap-2">
+                  <span className="font-medium truncate flex-1 mr-2">{player.name}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {player.completion_time && (
                       <Badge variant="secondary" className="text-xs">
                         DONE
@@ -406,7 +407,8 @@ const PlayGame = () => {
                     {player.is_winner && (
                       <div className="flex items-center gap-1">
                         <Trophy className="h-4 w-4 text-yellow-500" />
-                        <span className="text-sm text-yellow-600">Winner!</span>
+                        <span className="text-sm text-yellow-600 hidden sm:inline">Winner!</span>
+                        <span className="text-sm text-yellow-600 sm:hidden">🏆</span>
                       </div>
                     )}
                   </div>

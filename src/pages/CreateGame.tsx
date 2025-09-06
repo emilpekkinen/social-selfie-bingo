@@ -114,8 +114,8 @@ const CreateGame = () => {
   const requiredPrompts = cardSize === '9' ? 9 : 25;
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="w-full max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
@@ -182,7 +182,7 @@ const CreateGame = () => {
                   {prompts.filter(p => p.trim()).length} / {requiredPrompts}
                 </span>
               </div>
-              <div className={`grid ${gridCols} gap-3`}>
+              <div className={`grid ${gridCols} gap-2 sm:gap-3`}>
                 {prompts.map((prompt, index) => (
                   <div key={index} className="space-y-1">
                     <Label className="text-xs text-muted-foreground">
@@ -192,7 +192,7 @@ const CreateGame = () => {
                       value={prompt}
                       onChange={(e) => updatePrompt(index, e.target.value)}
                       placeholder="Enter prompt..."
-                      className="min-h-[80px] text-sm"
+                      className="min-h-[60px] sm:min-h-[80px] text-sm"
                       maxLength={200}
                     />
                   </div>

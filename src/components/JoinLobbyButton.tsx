@@ -21,7 +21,7 @@ const JoinLobbyButton = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="lg">Join a Lobby</Button>
+        <Button variant="outline" size="lg" className="w-full">Join a Lobby</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

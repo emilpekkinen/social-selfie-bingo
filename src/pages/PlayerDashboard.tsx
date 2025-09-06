@@ -121,23 +121,24 @@ const PlayerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="w-full max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 min-w-0 flex-1">
             <Link to="/">
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Home
+                <span className="hidden sm:inline">Back to Home</span>
+                <span className="sm:hidden">Back</span>
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold">My Bingo Games</h1>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold">My Bingo Games</h1>
               <p className="text-muted-foreground">Games you've participated in</p>
             </div>
           </div>
-          <Button variant="outline" onClick={signOut}>
+          <Button variant="outline" onClick={signOut} className="w-full sm:w-auto">
             Sign Out
           </Button>
         </div>
@@ -191,50 +192,53 @@ const PlayerDashboard = () => {
               {games.map((game) => (
                 <Card key={game.id}>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {game.title}
-                          {game.is_winner && <Trophy className="h-4 w-4 text-yellow-500" />}
+                    <div className="flex flex-col gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <CardTitle className="flex items-center gap-2 min-w-0">
+                          <span className="truncate">{game.title}</span>
+                          {game.is_winner && <Trophy className="h-4 w-4 text-yellow-500 flex-shrink-0" />}
                         </CardTitle>
-                        <CardDescription>
-                          <div className="flex items-center gap-4 mt-2">
-                            <Badge 
-                              variant="secondary" 
-                              className={`${getStatusColor(game.status)} text-white`}
-                            >
-                              {game.status}
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          {game.photo_count > 0 && (
+                            <Link to={`/game/${game.id}/gallery`} className="w-full sm:w-auto">
+                              <Button variant="outline" size="sm" className="w-full">
+                                <Images className="h-4 w-4 mr-2" />
+                                <span className="hidden sm:inline">View Gallery</span>
+                                <span className="sm:hidden">Gallery</span>
+                              </Button>
+                            </Link>
+                          )}
+                          {game.completion_time && (
+                            <Badge variant="secondary" className="text-center">
+                              <span className="hidden sm:inline">Completed {new Date(game.completion_time).toLocaleDateString()}</span>
+                              <span className="sm:hidden">Done ✓</span>
                             </Badge>
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {game.player_count} players
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Images className="h-3 w-3" />
-                              {game.photo_count} photos
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(game.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </CardDescription>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        {game.photo_count > 0 && (
-                          <Link to={`/game/${game.id}/gallery`}>
-                            <Button variant="outline" size="sm">
-                              <Images className="h-4 w-4 mr-2" />
-                              View Gallery
-                            </Button>
-                          </Link>
-                        )}
-                        {game.completion_time && (
-                          <Badge variant="secondary">
-                            Completed {new Date(game.completion_time).toLocaleDateString()}
+                      <CardDescription>
+                        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-4 text-sm">
+                          <Badge 
+                            variant="secondary" 
+                            className={`${getStatusColor(game.status)} text-white w-fit`}
+                          >
+                            {game.status}
                           </Badge>
-                        )}
-                      </div>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {game.player_count}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Images className="h-3 w-3" />
+                            {game.photo_count}
+                          </span>
+                          <span className="flex items-center gap-1 col-span-2 sm:col-span-1">
+                            <Calendar className="h-3 w-3" />
+                            <span className="hidden sm:inline">{new Date(game.created_at).toLocaleDateString()}</span>
+                            <span className="sm:hidden">{new Date(game.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          </span>
+                        </div>
+                      </CardDescription>
                     </div>
                   </CardHeader>
                 </Card>

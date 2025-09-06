@@ -149,19 +149,20 @@ const GameGallery = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="w-full max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             <Link to={isHost ? `/game/${gameId}/manage` : '/player'}>
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                {isHost ? 'Back to Game' : 'Back to My Games'}
+                <span className="hidden sm:inline">{isHost ? 'Back to Game' : 'Back to My Games'}</span>
+                <span className="sm:hidden">Back</span>
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold">{game.title} Gallery</h1>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-bold truncate">{game.title} Gallery</h1>
               <div className="flex items-center gap-2 mt-2">
                 <Images className="h-4 w-4" />
                 <Badge variant="secondary">
@@ -184,7 +185,7 @@ const GameGallery = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {photos.map((photo) => (
               <Card key={photo.id} className="overflow-hidden">
                 <div className="aspect-square relative">
@@ -194,14 +195,14 @@ const GameGallery = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <CardContent className="p-4">
-                  <h3 className="font-medium text-sm mb-2">{photo.text_prompt}</h3>
+                <CardContent className="p-3 sm:p-4">
+                  <h3 className="font-medium text-sm mb-2 line-clamp-2">{photo.text_prompt}</h3>
                   <div className="space-y-1 text-xs text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <User className="h-3 w-3" />
-                      <span>Person: {photo.person_name}</span>
+                      <User className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">Person: {photo.person_name}</span>
                     </div>
-                    <div>
+                    <div className="truncate">
                       Submitted by: {photo.player_name}
                     </div>
                     <div>
