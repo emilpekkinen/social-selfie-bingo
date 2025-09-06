@@ -25,6 +25,7 @@ interface GameData {
     id: string;
     name: string;
     is_winner: boolean;
+    completion_time?: string;
   }>;
   bingo_items: Array<{
     id: string;
@@ -93,7 +94,8 @@ const PlayGame = () => {
           players (
             id,
             name,
-            is_winner
+            is_winner,
+            completion_time
           ),
           bingo_items (
             id,
@@ -139,13 +141,33 @@ const PlayGame = () => {
     }
   };
 
-  const checkWinCondition = (newProgress: PlayerProgress) => {
+  const checkWinCondition = async (newProgress: PlayerProgress) => {
     if (!game) return;
     
     const totalItems = game.bingo_items.length;
     const completedItems = Object.keys(newProgress).length;
     
     if (completedItems === totalItems && game.status === 'active') {
+      // Mark player as completed in database
+      try {
+        await supabase
+          .from('players')
+          .update({ completion_time: new Date().toISOString() })
+          .eq('id', playerId);
+          
+        // Update local game state to show DONE status
+        setGame(prev => prev ? {
+          ...prev,
+          players: prev.players.map(player => 
+            player.id === playerId 
+              ? { ...player, completion_time: new Date().toISOString() }
+              : player
+          )
+        } : null);
+      } catch (error) {
+        console.error('Error updating player completion status:', error);
+      }
+      
       const randomMessage = winningMessages[Math.floor(Math.random() * winningMessages.length)];
       setWinMessage(randomMessage);
       setShowWinCelebration(true);
@@ -173,7 +195,7 @@ const PlayGame = () => {
       };
       
       setProgress(newProgress);
-      checkWinCondition(newProgress);
+      await checkWinCondition(newProgress);
 
       toast({
         title: 'Item completed!',
@@ -324,12 +346,19 @@ const PlayGame = () => {
               {game.players.map((player) => (
                 <div key={player.id} className="flex items-center justify-between p-2 border rounded">
                   <span className="font-medium">{player.name}</span>
-                  {player.is_winner && (
-                    <div className="flex items-center gap-1">
-                      <Trophy className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm text-yellow-600">Winner!</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {player.completion_time && (
+                      <Badge variant="secondary" className="text-xs">
+                        DONE
+                      </Badge>
+                    )}
+                    {player.is_winner && (
+                      <div className="flex items-center gap-1">
+                        <Trophy className="h-4 w-4 text-yellow-500" />
+                        <span className="text-sm text-yellow-600">Winner!</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
