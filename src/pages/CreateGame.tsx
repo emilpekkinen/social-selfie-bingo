@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Grid3x3, Grid } from 'lucide-react';
+import { ArrowLeft, Grid3x3, Grid, Upload, FileText } from 'lucide-react';
 
 const CreateGame = () => {
   const { user } = useAuth();
@@ -20,6 +20,7 @@ const CreateGame = () => {
   const [cardSize, setCardSize] = useState<'9' | '25'>('9');
   const [prompts, setPrompts] = useState<string[]>(Array(9).fill(''));
   const [loading, setLoading] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const handleCardSizeChange = (newSize: '9' | '25') => {
     setCardSize(newSize);
@@ -31,6 +32,105 @@ const CreateGame = () => {
     const newPrompts = [...prompts];
     newPrompts[index] = value;
     setPrompts(newPrompts);
+  };
+
+  const handleCSVImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid file format',
+        description: 'Please select a CSV file.',
+      });
+      return;
+    }
+
+    setImporting(true);
+
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+      
+      if (lines.length < 1 || lines.length > 25) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid CSV format',
+          description: 'CSV must contain between 1 and 25 rows of prompts.',
+        });
+        return;
+      }
+
+      // Parse CSV - handle potential commas in quoted fields, but expect single column
+      const parsedPrompts: string[] = [];
+      for (const line of lines) {
+        // Simple CSV parsing for single column - just trim and use the line
+        let prompt = line;
+        
+        // Remove quotes if the entire line is quoted
+        if (prompt.startsWith('"') && prompt.endsWith('"')) {
+          prompt = prompt.slice(1, -1);
+        }
+        
+        // Replace escaped quotes
+        prompt = prompt.replace(/""/g, '"');
+        
+        if (prompt.trim()) {
+          parsedPrompts.push(prompt.trim());
+        }
+      }
+
+      if (parsedPrompts.length === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'Empty CSV file',
+          description: 'The CSV file contains no valid prompts.',
+        });
+        return;
+      }
+
+      // Update card size if needed based on number of prompts
+      const promptCount = parsedPrompts.length;
+      let newCardSize: '9' | '25' = '9';
+      
+      if (promptCount > 9) {
+        newCardSize = '25';
+      }
+      
+      // Set card size and prompts
+      if (newCardSize !== cardSize) {
+        setCardSize(newCardSize);
+      }
+      
+      const newSize = newCardSize === '9' ? 9 : 25;
+      const newPrompts = Array(newSize).fill('');
+      
+      // Fill in the imported prompts
+      parsedPrompts.forEach((prompt, index) => {
+        if (index < newSize) {
+          newPrompts[index] = prompt;
+        }
+      });
+      
+      setPrompts(newPrompts);
+
+      toast({
+        title: 'CSV imported successfully!',
+        description: `Imported ${parsedPrompts.length} prompts. ${newCardSize === '25' ? 'Card size automatically set to 5×5.' : ''}`,
+      });
+
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error importing CSV',
+        description: 'Failed to read the CSV file. Please check the file format.',
+      });
+    } finally {
+      setImporting(false);
+      // Clear the file input
+      event.target.value = '';
+    }
   };
 
   const createGame = async () => {
@@ -176,11 +276,65 @@ const CreateGame = () => {
 
             {/* Bingo Prompts */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Bingo Prompts</Label>
-                <span className="text-sm text-muted-foreground">
-                  {prompts.filter(p => p.trim()).length} / {requiredPrompts}
-                </span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <Label>Bingo Prompts</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {prompts.filter(p => p.trim()).length} / {requiredPrompts}
+                  </span>
+                </div>
+                
+                {/* CSV Import */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCSVImport}
+                    className="hidden"
+                    id="csv-import"
+                    disabled={importing}
+                  />
+                  <label htmlFor="csv-import">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="cursor-pointer"
+                      disabled={importing}
+                      asChild
+                    >
+                      <span className="flex items-center gap-2">
+                        {importing ? (
+                          <>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            Importing...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4" />
+                            Import from CSV
+                          </>
+                        )}
+                      </span>
+                    </Button>
+                  </label>
+                </div>
+              </div>
+              
+              {/* CSV Format Info */}
+              <div className="bg-muted/50 border rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <FileText className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div className="text-sm text-muted-foreground">
+                    <p className="font-medium mb-1">CSV Format Requirements:</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>• Single column with bingo prompts</li>
+                      <li>• 1-25 rows (one prompt per row)</li>
+                      <li>• No headers required</li>
+                      <li>• Card size will auto-adjust for 10+ prompts</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               <div className={`grid ${gridCols} gap-2 sm:gap-3`}>
                 {prompts.map((prompt, index) => (
