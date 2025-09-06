@@ -103,3 +103,66 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Fireworks Animation */
+.fireworks-container {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.firework {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: firework 1.5s ease-out infinite;
+}
+
+.firework:nth-child(1) {
+  background: hsl(51, 100%, 50%);
+  animation-delay: 0s;
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.firework:nth-child(2) {
+  background: hsl(348, 100%, 61%);
+  animation-delay: 0.3s;
+  transform: translate(-50%, -50%) rotate(120deg);
+}
+
+.firework:nth-child(3) {
+  background: hsl(200, 100%, 50%);
+  animation-delay: 0.6s;
+  transform: translate(-50%, -50%) rotate(240deg);
+}
+
+@keyframes firework {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0);
+    box-shadow: 
+      0 0 0 0 currentColor,
+      0 0 0 0 currentColor,
+      0 0 0 0 currentColor,
+      0 0 0 0 currentColor,
+      0 0 0 0 currentColor,
+      0 0 0 0 currentColor;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow:
+      0 -100px 0 currentColor,
+      86px -50px 0 currentColor,
+      86px 50px 0 currentColor,
+      0 100px 0 currentColor,
+      -86px 50px 0 currentColor,
+      -86px -50px 0 currentColor;
+  }
+}

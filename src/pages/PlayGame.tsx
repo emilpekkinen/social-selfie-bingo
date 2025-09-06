@@ -41,6 +41,13 @@ interface PlayerProgress {
   };
 }
 
+const winningMessages = [
+  "Congratulations you checked all the boxes!",
+  "Bingo!",
+  "LETS GOOO!",
+  "You are a Certified Social Beast!"
+];
+
 const PlayGame = () => {
   const { playerId } = useParams<{ playerId: string }>();
   const { user } = useAuth();
@@ -54,6 +61,8 @@ const PlayGame = () => {
   const [selectedBingoItem, setSelectedBingoItem] = useState<string | null>(null);
   const [selectedBingoPrompt, setSelectedBingoPrompt] = useState<string>('');
   const [personName, setPersonName] = useState('');
+  const [showWinCelebration, setShowWinCelebration] = useState(false);
+  const [winMessage, setWinMessage] = useState('');
 
   useEffect(() => {
     if (playerId && user) {
@@ -130,6 +139,19 @@ const PlayGame = () => {
     }
   };
 
+  const checkWinCondition = (newProgress: PlayerProgress) => {
+    if (!game) return;
+    
+    const totalItems = game.bingo_items.length;
+    const completedItems = Object.keys(newProgress).length;
+    
+    if (completedItems === totalItems && game.status === 'active') {
+      const randomMessage = winningMessages[Math.floor(Math.random() * winningMessages.length)];
+      setWinMessage(randomMessage);
+      setShowWinCelebration(true);
+    }
+  };
+
   const markItemCompleted = async (bingoItemId: string, personName: string) => {
     try {
       const { error } = await supabase
@@ -142,13 +164,16 @@ const PlayGame = () => {
 
       if (error) throw error;
 
-      setProgress(prev => ({
-        ...prev,
+      const newProgress = {
+        ...progress,
         [bingoItemId]: {
           completed: true,
           person_name: personName
         }
-      }));
+      };
+      
+      setProgress(newProgress);
+      checkWinCondition(newProgress);
 
       toast({
         title: 'Item completed!',
@@ -350,6 +375,33 @@ const PlayGame = () => {
                 disabled={!personName.trim()}
               >
                 Mark Complete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Win Celebration Dialog */}
+        <Dialog open={showWinCelebration} onOpenChange={setShowWinCelebration}>
+          <DialogContent className="sm:max-w-md text-center">
+            <div className="fireworks-container">
+              <div className="firework"></div>
+              <div className="firework"></div>
+              <div className="firework"></div>
+            </div>
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-primary mb-4">
+                🎉 {winMessage} 🎉
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Trophy className="h-16 w-16 text-yellow-500 mx-auto animate-bounce" />
+              <p className="text-lg text-muted-foreground">
+                You've completed your entire bingo card!
+              </p>
+            </div>
+            <DialogFooter className="justify-center">
+              <Button onClick={() => setShowWinCelebration(false)}>
+                Awesome!
               </Button>
             </DialogFooter>
           </DialogContent>
