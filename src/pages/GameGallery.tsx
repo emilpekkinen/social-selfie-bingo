@@ -94,8 +94,9 @@ const GameGallery = () => {
           bingo_items (
             text_prompt
           ),
-          players (
-            name
+          players!inner (
+            name,
+            game_id
           )
         `)
         .eq('players.game_id', gameId)
