@@ -27,6 +27,7 @@ const JoinGame = () => {
   const [gameInfo, setGameInfo] = useState<GameInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
+  const [guestMode, setGuestMode] = useState(false);
 
   useEffect(() => {
     if (inviteCode) {
@@ -60,16 +61,6 @@ const JoinGame = () => {
   };
 
   const joinGame = async () => {
-    if (!user) {
-      toast({
-        variant: "destructive", 
-        title: "Authentication required",
-        description: "Please sign in to join games.",
-      });
-      navigate('/auth');
-      return;
-    }
-
     if (!gameInfo || !playerName.trim()) {
       toast({
         variant: 'destructive',
@@ -88,6 +79,15 @@ const JoinGame = () => {
       return;
     }
 
+    if (!user && !guestMode) {
+      toast({
+        variant: "destructive", 
+        title: "Authentication required",
+        description: "Please sign in or continue as guest to join games.",
+      });
+      return;
+    }
+
     setJoining(true);
 
     try {
@@ -96,7 +96,7 @@ const JoinGame = () => {
         .insert({
           game_id: gameInfo.id,
           name: playerName.trim(),
-          user_id: user.id
+          user_id: user?.id || null
         })
         .select()
         .single();
@@ -105,7 +105,7 @@ const JoinGame = () => {
 
       toast({
         title: 'Joined successfully!',
-        description: `Welcome to ${gameInfo.title}, ${playerName}!`,
+        description: `Welcome to ${gameInfo.title}, ${playerName}!${!user ? ' (as guest)' : ''}`,
       });
 
       // Navigate to the game interface
@@ -163,16 +163,19 @@ const JoinGame = () => {
           <CardDescription>Enter your name to join the game</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {!user && (
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-center">
-              <p className="text-sm text-destructive mb-3">
-                You need to be signed in to join games.
-              </p>
-              <Link to="/auth">
-                <Button size="sm" variant="destructive">
-                  Sign In
+          {!user && !guestMode && (
+            <div className="p-4 bg-muted rounded-lg space-y-3">
+              <p className="text-sm font-medium">Join as guest or sign in</p>
+              <div className="flex gap-2">
+                <Link to="/auth">
+                  <Button size="sm" variant="outline">
+                    Sign In
+                  </Button>
+                </Link>
+                <Button size="sm" onClick={() => setGuestMode(true)}>
+                  Continue as Guest
                 </Button>
-              </Link>
+              </div>
             </div>
           )}
 
@@ -200,29 +203,30 @@ const JoinGame = () => {
           </div>
 
           {/* Join Form */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="playerName">Your Name</Label>
-              <Input
-                id="playerName"
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                placeholder="Enter your name"
-                maxLength={50}
-                onKeyPress={(e) => e.key === 'Enter' && joinGame()}
-                disabled={!user}
-              />
-            </div>
+          {(user || guestMode) && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="playerName">Your Name</Label>
+                <Input
+                  id="playerName"
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Enter your name"
+                  maxLength={50}
+                  onKeyPress={(e) => e.key === 'Enter' && joinGame()}
+                />
+              </div>
 
-            <Button 
-              onClick={joinGame}
-              disabled={joining || !playerName.trim() || !user}
-              className="w-full"
-              size="lg"
-            >
-              {joining ? 'Joining...' : 'Join Game'}
-            </Button>
-          </div>
+              <Button 
+                onClick={joinGame}
+                disabled={joining || !playerName.trim()}
+                className="w-full"
+                size="lg"
+              >
+                {joining ? 'Joining...' : `Join Game${!user ? ' as Guest' : ''}`}
+              </Button>
+            </div>
+          )}
 
           {gameInfo.status === 'completed' && (
             <div className="text-center text-sm text-muted-foreground">

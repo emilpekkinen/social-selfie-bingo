@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +50,10 @@ const PlayGame = () => {
   const [game, setGame] = useState<GameData | null>(null);
   const [progress, setProgress] = useState<PlayerProgress>({});
   const [loading, setLoading] = useState(true);
+  const [showPersonDialog, setShowPersonDialog] = useState(false);
+  const [selectedBingoItem, setSelectedBingoItem] = useState<string | null>(null);
+  const [selectedBingoPrompt, setSelectedBingoPrompt] = useState<string>('');
+  const [personName, setPersonName] = useState('');
 
   useEffect(() => {
     if (playerId && user) {
@@ -260,10 +266,10 @@ const PlayGame = () => {
                       `}
                       onClick={() => {
                         if (game.status === 'active' && !isCompleted) {
-                          const personName = prompt(`Who matches "${item.text_prompt}"?\n\nEnter their name:`);
-                          if (personName?.trim()) {
-                            markItemCompleted(item.id, personName.trim());
-                          }
+                          setSelectedBingoItem(item.id);
+                          setSelectedBingoPrompt(item.text_prompt);
+                          setPersonName('');
+                          setShowPersonDialog(true);
                         }
                       }}
                     >
@@ -304,6 +310,50 @@ const PlayGame = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Person Name Dialog */}
+        <Dialog open={showPersonDialog} onOpenChange={setShowPersonDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Mark Item Complete</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Who matches: "{selectedBingoPrompt}"?
+              </p>
+              <Input
+                placeholder="Enter their name"
+                value={personName}
+                onChange={(e) => setPersonName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && personName.trim() && selectedBingoItem) {
+                    markItemCompleted(selectedBingoItem, personName.trim());
+                    setShowPersonDialog(false);
+                  }
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowPersonDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (personName.trim() && selectedBingoItem) {
+                    markItemCompleted(selectedBingoItem, personName.trim());
+                    setShowPersonDialog(false);
+                  }
+                }}
+                disabled={!personName.trim()}
+              >
+                Mark Complete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

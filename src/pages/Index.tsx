@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import JoinLobbyButton from '@/components/JoinLobbyButton';
 
 const Index = () => {
   const { user, signOut, loading } = useAuth();
@@ -23,13 +24,17 @@ const Index = () => {
         
         {user ? (
           <div className="space-y-4">
-            <p className="text-lg">Welcome back, Host!</p>
-            <div className="space-x-4">
+            <p className="text-lg">Welcome back!</p>
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
               <Link to="/host">
-                <Button size="lg">Go to Dashboard</Button>
+                <Button size="lg">Host a Game</Button>
               </Link>
-              <Button variant="outline" onClick={signOut}>Sign Out</Button>
+              <Link to="/host">
+                <Button variant="outline" size="lg">See Dashboard</Button>
+              </Link>
+              <JoinLobbyButton />
             </div>
+            <Button variant="ghost" onClick={signOut} className="mt-4">Sign Out</Button>
           </div>
         ) : (
           <div className="space-y-4">
