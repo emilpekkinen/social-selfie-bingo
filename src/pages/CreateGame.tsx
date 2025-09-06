@@ -460,7 +460,7 @@ const CreateGame = () => {
                       disabled={importing}
                       asChild
                     >
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2 w-full justify-center sm:justify-start">
                         {importing ? (
                           <>
                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
