@@ -14,7 +14,8 @@ import {
   Square, 
   Trophy,
   Clock,
-  ExternalLink 
+  ExternalLink,
+  Images 
 } from 'lucide-react';
 
 interface GameData {
@@ -232,6 +233,12 @@ const GameManage = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link to={`/game/${gameId}/gallery`}>
+              <Button variant="outline">
+                <Images className="h-4 w-4 mr-2" />
+                View Gallery
+              </Button>
+            </Link>
             <Button variant="outline" onClick={copyInviteLink}>
               <Copy className="h-4 w-4 mr-2" />
               Copy Invite Link

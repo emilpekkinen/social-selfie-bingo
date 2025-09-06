@@ -64,6 +64,8 @@ const PlayGame = () => {
   const [personName, setPersonName] = useState('');
   const [showWinCelebration, setShowWinCelebration] = useState(false);
   const [winMessage, setWinMessage] = useState('');
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (playerId && user) {
@@ -176,12 +178,35 @@ const PlayGame = () => {
 
   const markItemCompleted = async (bingoItemId: string, personName: string) => {
     try {
+      setIsUploading(true);
+      let photoUrl = null;
+
+      // Upload photo if one was taken
+      if (photoFile) {
+        const fileExt = photoFile.name.split('.').pop();
+        const fileName = `${playerId}-${bingoItemId}-${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('bingo-photos')
+          .upload(fileName, photoFile);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data } = supabase.storage
+          .from('bingo-photos')
+          .getPublicUrl(fileName);
+        
+        photoUrl = data.publicUrl;
+      }
+
       const { error } = await supabase
         .from('player_progress')
         .insert({
           player_id: playerId,
           bingo_item_id: bingoItemId,
-          person_name: personName
+          person_name: personName,
+          photo_url: photoUrl
         });
 
       if (error) throw error;
@@ -190,7 +215,8 @@ const PlayGame = () => {
         ...progress,
         [bingoItemId]: {
           completed: true,
-          person_name: personName
+          person_name: personName,
+          photo_url: photoUrl
         }
       };
       
@@ -199,14 +225,21 @@ const PlayGame = () => {
 
       toast({
         title: 'Item completed!',
-        description: `Marked "${personName}" for this item.`,
+        description: photoFile ? 
+          `Marked "${personName}" with photo for this item.` :
+          `Marked "${personName}" for this item.`,
       });
+
+      // Reset form
+      setPhotoFile(null);
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: error.message,
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -316,18 +349,36 @@ const PlayGame = () => {
                           setSelectedBingoItem(item.id);
                           setSelectedBingoPrompt(item.text_prompt);
                           setPersonName('');
+                          setPhotoFile(null);
                           setShowPersonDialog(true);
                         }
                       }}
                     >
-                      {isCompleted && (
-                        <CheckCircle2 className="h-5 w-5 text-green-600 mb-2" />
-                      )}
-                      <p className="font-medium mb-2">{item.text_prompt}</p>
-                      {isCompleted && progress[item.id]?.person_name && (
-                        <p className="text-xs text-green-600 font-medium">
-                          ✓ {progress[item.id].person_name}
-                        </p>
+                      {isCompleted && progress[item.id]?.photo_url ? (
+                        <div className="relative w-full h-full">
+                          <img 
+                            src={progress[item.id].photo_url} 
+                            alt={item.text_prompt}
+                            className="w-full h-full object-cover rounded"
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white text-xs p-2 rounded">
+                            <CheckCircle2 className="h-4 w-4 mb-1" />
+                            <p className="font-medium text-center mb-1">{item.text_prompt}</p>
+                            <p className="text-xs">✓ {progress[item.id].person_name}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {isCompleted && (
+                            <CheckCircle2 className="h-5 w-5 text-green-600 mb-2" />
+                          )}
+                          <p className="font-medium mb-2">{item.text_prompt}</p>
+                          {isCompleted && progress[item.id]?.person_name && (
+                            <p className="text-xs text-green-600 font-medium">
+                              ✓ {progress[item.id].person_name}
+                            </p>
+                          )}
+                        </>
                       )}
                     </div>
                   );
@@ -380,30 +431,56 @@ const PlayGame = () => {
                 value={personName}
                 onChange={(e) => setPersonName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && personName.trim() && selectedBingoItem) {
+                  if (e.key === 'Enter' && personName.trim() && selectedBingoItem && !isUploading) {
                     markItemCompleted(selectedBingoItem, personName.trim());
                     setShowPersonDialog(false);
                   }
                 }}
               />
+              
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Camera className="h-4 w-4" />
+                  <span className="text-sm font-medium">Add Photo (Optional)</span>
+                </div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setPhotoFile(file);
+                  }}
+                  className="cursor-pointer"
+                />
+                {photoFile && (
+                  <div className="text-sm text-green-600">
+                    Photo selected: {photoFile.name}
+                  </div>
+                )}
+              </div>
             </div>
             <DialogFooter>
               <Button
                 variant="outline"
-                onClick={() => setShowPersonDialog(false)}
+                onClick={() => {
+                  setShowPersonDialog(false);
+                  setPhotoFile(null);
+                }}
+                disabled={isUploading}
               >
                 Cancel
               </Button>
               <Button
                 onClick={() => {
-                  if (personName.trim() && selectedBingoItem) {
+                  if (personName.trim() && selectedBingoItem && !isUploading) {
                     markItemCompleted(selectedBingoItem, personName.trim());
                     setShowPersonDialog(false);
                   }
                 }}
-                disabled={!personName.trim()}
+                disabled={!personName.trim() || isUploading}
               >
-                Mark Complete
+                {isUploading ? 'Uploading...' : 'Mark Complete'}
               </Button>
             </DialogFooter>
           </DialogContent>
