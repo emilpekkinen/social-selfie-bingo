@@ -9,7 +9,135 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Grid3x3, Grid, Upload, FileText } from 'lucide-react';
+import { ArrowLeft, Grid3x3, Grid, Upload, FileText, Shuffle } from 'lucide-react';
+
+const BINGO_PROMPTS = [
+  "Has traveled to more than 5 countries",
+  "Owns a quirky mug collection",
+  "Can play a musical instrument",
+  "Knows how to juggle",
+  "Has met a celebrity",
+  "Loves pineapple on pizza",
+  "Has run a marathon",
+  "Can whistle loudly",
+  "Has broken a bone",
+  "Is a morning person",
+  "Has a tattoo",
+  "Can cook a signature dish",
+  "Has a twin",
+  "Knows how to salsa dance",
+  "Has been on TV",
+  "Speaks more than 2 languages",
+  "Has a pet with an unusual name",
+  "Is afraid of heights",
+  "Loves board games",
+  "Has tried bungee jumping",
+  "Can recite a movie quote perfectly",
+  "Has dyed their hair a wild color",
+  "Loves karaoke nights",
+  "Collects something unusual",
+  "Knows how to knit or crochet",
+  "Has a favorite ice cream flavor that's unusual",
+  "Can wiggle their ears",
+  "Has been camping in the wild",
+  "Loves horror movies",
+  "Has met someone famous by accident",
+  "Knows how to skateboard",
+  "Has ridden a horse",
+  "Can solve a Rubik's cube",
+  "Has a green thumb (loves plants)",
+  "Prefers cats over dogs",
+  "Prefers dogs over cats",
+  "Loves rainy days",
+  "Has been in a play or musical",
+  "Can touch their toes without bending knees",
+  "Has seen a shooting star",
+  "Loves spicy food",
+  "Has gone scuba diving or snorkeling",
+  "Can whistle a tune",
+  "Owns more than 20 pairs of shoes",
+  "Has been in a parade",
+  "Has dyed their hair more than 3 times",
+  "Can say the alphabet backwards",
+  "Knows how to hula hoop",
+  "Loves reading mystery novels",
+  "Can bake amazing cookies",
+  "Has been on a cruise ship",
+  "Wears mismatched socks sometimes",
+  "Has given a public speech",
+  "Loves roller coasters",
+  "Doesn't drink coffee",
+  "Has a favorite superhero",
+  "Has lived in another country",
+  "Can snap with both hands",
+  "Knows all the words to a song by heart",
+  "Owns something vintage",
+  "Loves making TikTok or Instagram reels",
+  "Has eaten something exotic",
+  "Wears glasses",
+  "Is the youngest sibling",
+  "Is the oldest sibling",
+  "Is an only child",
+  "Loves to nap",
+  "Has gotten lost in a new city",
+  "Owns a funny hat",
+  "Has written a poem or song",
+  "Has attended a concert",
+  "Collects magnets from places they visit",
+  "Loves chocolate more than candy",
+  "Has binge-watched an entire show in one weekend",
+  "Knows how to ice skate",
+  "Loves to swim",
+  "Has been stung by a bee",
+  "Can clap with one hand",
+  "Loves autumn the most",
+  "Has met their idol",
+  "Has done yoga",
+  "Can play chess",
+  "Loves cooking new recipes",
+  "Has taken a road trip",
+  "Owns a board game collection",
+  "Loves to dance",
+  "Knows how to sew or mend clothes",
+  "Has painted a picture",
+  "Loves the beach more than the mountains",
+  "Loves the mountains more than the beach",
+  "Is afraid of spiders",
+  "Has celebrated New Year's in another country",
+  "Knows a fun party trick",
+  "Can imitate a celebrity voice",
+  "Loves taking photos",
+  "Has sung in front of strangers",
+  "Knows how to ride a bike",
+  "Owns more than 50 books",
+  "Loves puzzles",
+  "Has been part of a sports team",
+  "Knows a tongue twister really well",
+  "Has fallen asleep at the movies",
+  "Loves hot chocolate",
+  "Prefers tea over coffee",
+  "Owns a funny T-shirt",
+  "Has made a snowman",
+  "Loves watching documentaries",
+  "Has volunteered for a cause",
+  "Knows their zodiac sign",
+  "Believes in lucky charms",
+  "Has been on a Ferris wheel",
+  "Knows how to play cards",
+  "Owns a pet fish",
+  "Knows a dance from TikTok",
+  "Loves musicals",
+  "Can say hello in 5 languages",
+  "Has ridden a camel or elephant",
+  "Has written in a journal or diary",
+  "Loves theme parks",
+  "Has fainted before",
+  "Can roll their tongue",
+  "Has fallen asleep in class or at work",
+  "Has a favorite holiday sweater",
+  "Has attended a wedding this year",
+  "Loves late-night snacks"
+];
 
 const CreateGame = () => {
   const { user } = useAuth();
@@ -32,6 +160,24 @@ const CreateGame = () => {
     const newPrompts = [...prompts];
     newPrompts[index] = value;
     setPrompts(newPrompts);
+  };
+
+  const generateRandomPrompts = () => {
+    const requiredCount = cardSize === '9' ? 9 : 25;
+    const shuffled = [...BINGO_PROMPTS].sort(() => Math.random() - 0.5);
+    const selectedPrompts = shuffled.slice(0, requiredCount);
+    
+    const newPrompts = Array(requiredCount).fill('');
+    selectedPrompts.forEach((prompt, index) => {
+      newPrompts[index] = prompt;
+    });
+    
+    setPrompts(newPrompts);
+    
+    toast({
+      title: 'Random prompts generated!',
+      description: `Generated ${requiredCount} random bingo prompts.`,
+    });
   };
 
   const handleCSVImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -284,8 +430,19 @@ const CreateGame = () => {
                   </span>
                 </div>
                 
-                {/* CSV Import */}
-                <div className="flex items-center gap-2">
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateRandomPrompts}
+                    className="w-full sm:w-auto"
+                  >
+                    <Shuffle className="h-4 w-4 mr-2" />
+                    Create Random Prompts
+                  </Button>
+                  
                   <input
                     type="file"
                     accept=".csv"
@@ -299,7 +456,7 @@ const CreateGame = () => {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="cursor-pointer"
+                      className="cursor-pointer w-full sm:w-auto"
                       disabled={importing}
                       asChild
                     >
