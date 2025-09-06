@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Clock, Trophy, ExternalLink } from 'lucide-react';
+import { Plus, Users, Clock, Trophy, ExternalLink, Home } from 'lucide-react';
 
 interface Game {
   id: string;
@@ -20,6 +20,7 @@ interface Game {
 
 const HostDashboard = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,6 +104,14 @@ const HostDashboard = () => {
             <p className="text-muted-foreground">Manage your Social Bingo games</p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/')}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <Home className="h-4 w-4" />
+              Back to Main Menu
+            </Button>
             <Link to="/create-game" className="w-full sm:w-auto">
               <Button size="lg" className="flex items-center justify-center gap-2 w-full">
                 <Plus className="h-5 w-5" />
