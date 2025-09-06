@@ -140,6 +140,7 @@ export type Database = {
           is_winner: boolean
           joined_at: string
           name: string
+          user_id: string | null
         }
         Insert: {
           completion_time?: string | null
@@ -148,6 +149,7 @@ export type Database = {
           is_winner?: boolean
           joined_at?: string
           name: string
+          user_id?: string | null
         }
         Update: {
           completion_time?: string | null
@@ -156,6 +158,7 @@ export type Database = {
           is_winner?: boolean
           joined_at?: string
           name?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -199,6 +202,32 @@ export type Database = {
       generate_invite_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_public_game: {
+        Args: { invite_code: string }
+        Returns: {
+          card_size: number
+          id: string
+          player_count: number
+          status: string
+          title: string
+        }[]
+      }
+      is_game_host: {
+        Args: { _game_id: string }
+        Returns: boolean
+      }
+      is_host_of_progress: {
+        Args: { _player_id: string }
+        Returns: boolean
+      }
+      is_member_of_game: {
+        Args: { _game_id: string }
+        Returns: boolean
+      }
+      owns_player: {
+        Args: { _player_id: string }
+        Returns: boolean
       }
     }
     Enums: {
