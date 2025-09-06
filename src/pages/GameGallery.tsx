@@ -154,7 +154,7 @@ const GameGallery = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to={isHost ? `/game/${gameId}/manage` : '/player-dashboard'}>
+            <Link to={isHost ? `/game/${gameId}/manage` : '/player'}>
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
                 {isHost ? 'Back to Game' : 'Back to My Games'}
