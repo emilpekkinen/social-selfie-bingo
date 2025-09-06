@@ -147,21 +147,3 @@ flowchart TD
     style O fill:#c8e6c9
     style P fill:#ffecb3
 </lov-mermaid>
-
-## Contributing
-
-This project is built with Lovable. To contribute or modify:
-
-1. Use the Lovable editor for real-time development
-2. All changes are automatically committed
-3. Test changes in the live preview
-
-## Support
-
-For questions or issues:
-- Check the [Lovable Documentation](https://docs.lovable.dev/)
-- Join the [Lovable Discord Community](https://discord.com/channels/1119885301872070706/1280461670979993613)
-
----
-
-**Built with ❤️ using [Lovable](https://lovable.dev)**
