@@ -25,7 +25,9 @@ const Index = () => {
           <div className="space-y-4">
             <p className="text-lg">Welcome back, Host!</p>
             <div className="space-x-4">
-              <Button size="lg">Create New Game</Button>
+              <Link to="/host">
+                <Button size="lg">Go to Dashboard</Button>
+              </Link>
               <Button variant="outline" onClick={signOut}>Sign Out</Button>
             </div>
           </div>
