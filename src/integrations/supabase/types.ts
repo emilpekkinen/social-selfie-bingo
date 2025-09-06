@@ -14,6 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
+      bingo_items: {
+        Row: {
+          created_at: string
+          game_id: string
+          id: string
+          position: number
+          text_prompt: string
+        }
+        Insert: {
+          created_at?: string
+          game_id: string
+          id?: string
+          position: number
+          text_prompt: string
+        }
+        Update: {
+          created_at?: string
+          game_id?: string
+          id?: string
+          position?: number
+          text_prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bingo_items_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          card_size: number
+          created_at: string
+          ended_at: string | null
+          host_id: string
+          id: string
+          invite_code: string
+          started_at: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          card_size: number
+          created_at?: string
+          ended_at?: string | null
+          host_id: string
+          id?: string
+          invite_code: string
+          started_at?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          card_size?: number
+          created_at?: string
+          ended_at?: string | null
+          host_id?: string
+          id?: string
+          invite_code?: string
+          started_at?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      player_progress: {
+        Row: {
+          bingo_item_id: string
+          completed_at: string
+          id: string
+          person_name: string
+          photo_url: string | null
+          player_id: string
+        }
+        Insert: {
+          bingo_item_id: string
+          completed_at?: string
+          id?: string
+          person_name: string
+          photo_url?: string | null
+          player_id: string
+        }
+        Update: {
+          bingo_item_id?: string
+          completed_at?: string
+          id?: string
+          person_name?: string
+          photo_url?: string | null
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_progress_bingo_item_id_fkey"
+            columns: ["bingo_item_id"]
+            isOneToOne: false
+            referencedRelation: "bingo_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_progress_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      players: {
+        Row: {
+          completion_time: string | null
+          game_id: string
+          id: string
+          is_winner: boolean
+          joined_at: string
+          name: string
+        }
+        Insert: {
+          completion_time?: string | null
+          game_id: string
+          id?: string
+          is_winner?: boolean
+          joined_at?: string
+          name: string
+        }
+        Update: {
+          completion_time?: string | null
+          game_id?: string
+          id?: string
+          is_winner?: boolean
+          joined_at?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "players_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -43,7 +196,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_invite_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
