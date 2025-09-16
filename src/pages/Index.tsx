@@ -42,7 +42,7 @@ const Index = () => {
           <div className="space-y-4">
             <p className="text-lg text-muted-foreground">Host a Social Bingo game</p>
             <Link to="/auth" className="w-full">
-              <Button size="lg" className="w-full">Sign In as Host</Button>
+              <Button size="lg" className="w-full">Sign In</Button>
             </Link>
           </div>
         )}
