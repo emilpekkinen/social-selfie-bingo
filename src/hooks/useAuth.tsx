@@ -65,6 +65,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    // Navigate to home page after sign out
+    window.location.href = '/';
   };
 
   const signInWithGoogle = async () => {
