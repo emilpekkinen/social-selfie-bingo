@@ -68,19 +68,18 @@ const PlayGame = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    if (playerId && user) {
+    if (playerId) {
       fetchGameData();
     }
-  }, [playerId, user]);
+  }, [playerId]);
 
   const fetchGameData = async () => {
     try {
       // First get the player data to find the game
       const { data: playerData, error: playerError } = await supabase
         .from('players')
-        .select('game_id, name, is_winner')
+        .select('game_id, name, is_winner, user_id')
         .eq('id', playerId)
-        .eq('user_id', user?.id)
         .single();
 
       if (playerError) throw playerError;
@@ -181,8 +180,8 @@ const PlayGame = () => {
       setIsUploading(true);
       let photoUrl = null;
 
-      // Upload photo if one was taken
-      if (photoFile) {
+      // Upload photo if one was taken (only for authenticated users)
+      if (photoFile && user) {
         const fileExt = photoFile.name.split('.').pop();
         const fileName = `${playerId}-${bingoItemId}-${Date.now()}.${fileExt}`;
         
@@ -440,27 +439,39 @@ const PlayGame = () => {
                 }}
               />
               
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Camera className="h-4 w-4" />
-                  <span className="text-sm font-medium">Add Photo (Optional)</span>
-                </div>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) setPhotoFile(file);
-                  }}
-                  className="cursor-pointer"
-                />
-                {photoFile && (
-                  <div className="text-sm text-green-600">
-                    Photo selected: {photoFile.name}
+              {/* Photo upload only for authenticated users */}
+              {user && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Camera className="h-4 w-4" />
+                    <span className="text-sm font-medium">Add Photo (Optional)</span>
                   </div>
-                )}
-              </div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setPhotoFile(file);
+                    }}
+                    className="cursor-pointer"
+                  />
+                  {photoFile && (
+                    <div className="text-sm text-green-600">
+                      Photo selected: {photoFile.name}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Guest mode message */}
+              {!user && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Sign in to add photos to your bingo items
+                  </p>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button

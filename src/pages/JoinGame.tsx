@@ -79,14 +79,7 @@ const JoinGame = () => {
       return;
     }
 
-    if (!user && !guestMode) {
-      toast({
-        variant: "destructive", 
-        title: "Authentication required",
-        description: "Please sign in or continue as guest to join games.",
-      });
-      return;
-    }
+    // Remove this check - allow both authenticated users and guests
 
     setJoining(true);
 
