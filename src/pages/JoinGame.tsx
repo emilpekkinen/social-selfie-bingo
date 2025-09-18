@@ -176,7 +176,7 @@ const JoinGame = () => {
         <CardContent className="space-y-6">
           {!user && !guestMode && (
             <div className="p-4 bg-muted rounded-lg space-y-3">
-              <p className="text-sm font-medium">Join as guest or sign in</p>
+              <p className="text-sm font-medium">Sign in to join!</p>
               <div className="flex gap-2">
                 <Link to="/auth">
                   <Button size="sm" variant="outline">
