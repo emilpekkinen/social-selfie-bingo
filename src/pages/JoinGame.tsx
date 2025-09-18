@@ -183,9 +183,6 @@ const JoinGame = () => {
                     Sign In
                   </Button>
                 </Link>
-                <Button size="sm" onClick={() => setGuestMode(true)}>
-                  Continue as Guest
-                </Button>
               </div>
             </div>
           )}
