@@ -84,6 +84,11 @@ const PlayGame = () => {
 
       if (playerError) throw playerError;
 
+      // Check if this player belongs to the current user or is a guest
+      if (playerData.user_id && playerData.user_id !== user?.id) {
+        throw new Error('Unauthorized access to this game');
+      }
+
       // Then get the full game data
       const { data: gameData, error: gameError } = await supabase
         .from('games')
