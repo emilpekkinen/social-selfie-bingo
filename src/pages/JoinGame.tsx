@@ -32,6 +32,24 @@ const JoinGame = () => {
   useEffect(() => {
     if (inviteCode) {
       fetchGameInfo();
+      
+      // Set up real-time subscription for player count updates
+      const playersChannel = supabase
+        .channel(`invite-${inviteCode}-updates`)
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'players' },
+          (payload) => {
+            console.log('Player update detected:', payload);
+            // Refresh game info when players join/leave
+            fetchGameInfo();
+          }
+        )
+        .subscribe();
+
+      // Cleanup subscription
+      return () => {
+        supabase.removeChannel(playersChannel);
+      };
     }
   }, [inviteCode]);
 

@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
+import RealtimeStatus from '@/components/RealtimeStatus';
+import {
   ArrowLeft, 
   Users, 
   Copy, 
@@ -47,10 +48,67 @@ const GameManage = () => {
   
   const [game, setGame] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [newPlayerHighlight, setNewPlayerHighlight] = useState<string | null>(null);
 
   useEffect(() => {
     if (gameId && user) {
       fetchGameData();
+      
+      // Set up real-time subscriptions for this game
+      const playersChannel = supabase
+        .channel(`game-${gameId}-players`)
+        .on('postgres_changes',
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'players',
+            filter: `game_id=eq.${gameId}`
+          },
+          (payload) => {
+            console.log('Player change in game:', payload);
+            // Refresh game data when players join/leave
+            fetchGameData();
+            
+            // Show toast for new players joining
+            if (payload.eventType === 'INSERT') {
+              const newPlayerName = payload.new.name;
+              toast({
+                title: 'New player joined!',
+                description: `${newPlayerName} joined the game`,
+              });
+              
+              // Highlight new player for a few seconds
+              setNewPlayerHighlight(payload.new.id);
+              setTimeout(() => setNewPlayerHighlight(null), 3000);
+            }
+          }
+        )
+        .on('postgres_changes',
+          { 
+            event: 'UPDATE', 
+            schema: 'public', 
+            table: 'games',
+            filter: `id=eq.${gameId}`
+          },
+          (payload) => {
+            console.log('Game status changed:', payload);
+            // Refresh when game status changes
+            fetchGameData();
+            
+            if (payload.new.status !== payload.old.status) {
+              toast({
+                title: 'Game status updated',
+                description: `Game is now ${payload.new.status}`,
+              });
+            }
+          }
+        )
+        .subscribe();
+
+      // Cleanup subscription
+      return () => {
+        supabase.removeChannel(playersChannel);
+      };
     }
   }, [gameId, user]);
 
@@ -272,6 +330,7 @@ const GameManage = () => {
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
                   Players ({game.players.length})
+                  <RealtimeStatus />
                 </CardTitle>
                 <CardDescription>
                   Players who have joined the game
@@ -286,7 +345,9 @@ const GameManage = () => {
                   game.players
                     .sort((a, b) => new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime())
                     .map((player) => (
-                      <div key={player.id} className="flex items-center justify-between p-2 border rounded">
+                       <div key={player.id} className={`flex items-center justify-between p-2 border rounded transition-all duration-500 ${
+                         newPlayerHighlight === player.id ? 'bg-green-100 border-green-300 shadow-md' : ''
+                       }`}>
                         <div>
                           <p className="font-medium">{player.name}</p>
                           <p className="text-xs text-muted-foreground">

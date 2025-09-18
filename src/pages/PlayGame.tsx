@@ -70,6 +70,59 @@ const PlayGame = () => {
   useEffect(() => {
     if (playerId) {
       fetchGameData();
+      
+      // Set up real-time subscriptions for game updates
+      const gameUpdatesChannel = supabase
+        .channel(`play-${playerId}-updates`)
+        .on('postgres_changes',
+          { 
+            event: 'UPDATE', 
+            schema: 'public', 
+            table: 'games'
+          },
+          (payload) => {
+            console.log('Game status updated:', payload);
+            // Refresh game data when status changes
+            fetchGameData();
+            
+            if (payload.new.status !== payload.old.status) {
+              toast({
+                title: 'Game status changed',
+                description: `Game is now ${payload.new.status}`,
+              });
+            }
+          }
+        )
+        .on('postgres_changes',
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'players'
+          },
+          (payload) => {
+            console.log('Player updated:', payload);
+            // Refresh to show new players or completion status
+            fetchGameData();
+          }
+        )
+        .on('postgres_changes',
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'player_progress'
+          },
+          (payload) => {
+            console.log('Player progress updated:', payload);
+            // Refresh to show progress updates
+            fetchGameData();
+          }
+        )
+        .subscribe();
+
+      // Cleanup subscription
+      return () => {
+        supabase.removeChannel(gameUpdatesChannel);
+      };
     }
   }, [playerId]);
 

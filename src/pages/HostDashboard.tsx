@@ -28,6 +28,37 @@ const HostDashboard = () => {
   useEffect(() => {
     if (user) {
       fetchGames();
+      
+      // Set up real-time subscriptions
+      const gamesChannel = supabase
+        .channel('games-changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'games', filter: `host_id=eq.${user.id}` },
+          (payload) => {
+            console.log('Game updated:', payload);
+            // Refresh games when any change happens to host's games
+            fetchGames();
+          }
+        )
+        .subscribe();
+
+      const playersChannel = supabase
+        .channel('players-changes')
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'players' },
+          (payload) => {
+            console.log('Player updated:', payload);
+            // Refresh games to update player counts
+            fetchGames();
+          }
+        )
+        .subscribe();
+
+      // Cleanup subscriptions on unmount
+      return () => {
+        supabase.removeChannel(gamesChannel);
+        supabase.removeChannel(playersChannel);
+      };
     }
   }, [user]);
 
